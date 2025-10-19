@@ -431,9 +431,12 @@ document.getElementById('toggle-answer').addEventListener('click', () => {
     showAnswer = !showAnswer;
     const flashcard = document.querySelector('.flashcard');
     const selectedCategory = document.getElementById('category').value;
-    const filteredFlashcards = flashcards.filter(card => card.category === selectedCategory);
+    // Wichtig: Denselben Filter wie in filterFlashcards() verwenden
+    const filteredFlashcards = flashcards.filter(card =>
+      card.category === selectedCategory && isCardDue(card)
+    );
 
-    if (showAnswer) {
+    if (showAnswer && filteredFlashcards.length > 0) {
       // Flip zur Antwort
       document.getElementById('answer').innerText = filteredFlashcards[currentIndex].answer;
       flashcard.classList.add('flipped');
