@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#667eea">
+  <meta name="description" content="Intelligente Karteikarten-App mit Leitner Spaced Repetition System">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Karteikarten App</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Seite für Karteikarten -->
+  <div id="app">
+    <h1>Karteikarten App</h1>
+    <div id="start-page" class="page active">
+      <h2>Willkommen zur Karteikarten App</h2>
+      <label for="category"><i class="fas fa-folder"></i> Bitte Kategorie auswählen:</label>
+      <select id="category" onchange="filterFlashcards()">
+        <option value="Mathe">Mathe</option>
+        <option value="Deutsch">Deutsch</option>
+        <option value="Englisch">Englisch</option>
+      </select>
+      <button onclick="showPage('flashcard-page')" class="btn-primary"><i class="fas fa-play"></i> Lernen starten</button>
+      <button onclick="showPage('statistics-page')" class="btn-info"><i class="fas fa-chart-bar"></i> Statistiken</button>
+      <button onclick="showPage('settings-page')" class="btn-secondary"><i class="fas fa-cog"></i> Einstellungen</button>
+    </div>    
+    <div id="flashcard-page" class="page">
+      <h2>Karteikarten</h2>
+      <div id="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-inner">
+            <div class="flashcard-front">
+              <div class="card-label">Frage</div>
+              <div id="question"></div>
+            </div>
+            <div class="flashcard-back">
+              <div class="card-label">Antwort</div>
+              <div id="answer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="toggle-answer" class="btn-primary"><i class="fas fa-sync-alt"></i> Antwort anzeigen</button>
+      <button id="correct-answer" class="btn-success" style="display: none;"><i class="fas fa-check"></i> Richtig</button>
+      <button id="incorrect-answer" class="btn-danger" style="display: none;"><i class="fas fa-times"></i> Falsch</button>
+      <button onclick="showPage('start-page')" class="btn-secondary"><i class="fas fa-arrow-left"></i> Zurück</button>
+    </div>
+    <div id="result-page" class="page">
+      <h2>Hier ist dein Ergebnis</h2>
+      <p id="result"></p>
+      <button onclick="showPage('start-page')">Zurück zum Startbildschirm</button>
+    </div>
+    <div id="statistics-page" class="page">
+      <h2>Statistiken</h2>
+
+      <!-- Leitner-Box Übersicht -->
+      <div class="stat-section">
+        <h3>Leitner-Box Übersicht</h3>
+        <div id="leitner-overview"></div>
+      </div>
+
+      <!-- Lernverlauf -->
+      <div class="stat-section">
+        <h3>Lernverlauf</h3>
+        <div id="learning-history"></div>
+      </div>
+
+      <!-- Kategorie-Analyse -->
+      <div class="stat-section">
+        <h3>Kategorie-Analyse</h3>
+        <div id="category-analysis"></div>
+      </div>
+
+      <button onclick="showPage('start-page')">Zurück</button>
+    </div>
+    <div id="incorrect-cards-page" class="page">
+      <h2>Falsch beantwortete Karten</h2>
+      <div id="incorrect-cards-list"></div>
+      <button onclick="showPage('start-page')">Zurück zum Startbildschirm</button>
+    </div>
+    <div id="settings-page" class="page">
+      <div id="edit-flashcard-section">
+        <h3>Karteikarte bearbeiten</h3>
+        <select id="edit-flashcard-select"></select>
+        <input type="text" id="edit-question" placeholder="Neue Frage">
+        <input type="text" id="edit-answer" placeholder="Neue Antwort">
+        <button onclick="editFlashcard()">Speichern</button>
+      </div>
+      <h2>Einstellungen</h2>
+      <button onclick="showPage('start-page')" class="btn-secondary"><i class="fas fa-arrow-left"></i> Zurück</button>
+      <button onclick="showPage('add-category-page')" class="btn-primary"><i class="fas fa-folder-plus"></i> Kategorie hinzufügen</button>
+      <button onclick="showPage('remove-category-page')" class="btn-danger"><i class="fas fa-folder-minus"></i> Kategorie entfernen</button>
+      <button onclick="showPage('add-flashcard-page')" class="btn-primary"><i class="fas fa-plus"></i> Karteikarte hinzufügen</button>
+      <button onclick="showPage('remove-flashcard-page')" class="btn-danger"><i class="fas fa-trash"></i> Karteikarte löschen</button>
+      <h3 style="margin-top: 30px;"><i class="fas fa-database"></i> Daten-Verwaltung</h3>
+      <button onclick="exportData()" class="btn-info"><i class="fas fa-download"></i> Daten exportieren (JSON)</button>
+      <button onclick="document.getElementById('import-file').click()" class="btn-info"><i class="fas fa-upload"></i> Daten importieren</button>
+      <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+    </div>
+    <div id="add-category-page" class="page">
+      <h2>Kategorie hinzufügen</h2>
+      <label for="new-category-name">Kategorie Name:</label>
+      <input type="text" id="new-category-name">
+      <button onclick="addCategory()">Speichern</button>
+      <button onclick="showPage('settings-page')">Zurück</button>
+    </div>
+    <div id="remove-category-page" class="page">
+      <h2>Kategorie entfernen</h2>
+      <label for="remove-category">Kategorie auswählen:</label>
+      <select id="remove-category">
+        <!-- Kategorien werden hier dynamisch hinzugefügt -->
+      </select>
+      <button onclick="removeCategory()">Entfernen</button>
+      <button onclick="showPage('settings-page')">Zurück</button>
+    </div>
+    <div id="add-flashcard-page" class="page">
+      <h2>Karteikarte hinzufügen</h2>
+      <label for="new-question">Frage:</label>
+      <input type="text" id="new-question">
+      <label for="new-answer">Antwort:</label>
+      <input type="text" id="new-answer">
+      <label for="new-category">Kategorie:</label>
+      <select id="new-category">
+        <!-- Kategorien werden hier dynamisch hinzugefügt -->
+      </select>
+      <button onclick="addFlashcard()">Speichern</button>
+      <button onclick="showPage('settings-page')">Zurück</button>
+    </div>
+    <div id="remove-flashcard-page" class="page">
+      <h2>Karteikarte löschen</h2>
+      <label for="remove-flashcard">Karteikarte auswählen:</label>
+      <select id="remove-flashcard">
+        <!-- Karteikarten werden hier dynamisch hinzugefügt -->
+      </select>
+      <button onclick="removeFlashcard()">Löschen</button>
+      <button onclick="showPage('settings-page')">Zurück</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  </script>
+</body>
+</html>
