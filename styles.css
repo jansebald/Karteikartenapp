@@ -271,11 +271,6 @@
     cursor: pointer;
     background-color: white;
   }
-  
-  #answer {
-    margin-top: 20px;
-    font-weight: bold;
-  }
 
   /* Statistik-Seite */
   .stat-section {
