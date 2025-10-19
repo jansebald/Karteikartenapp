@@ -306,8 +306,13 @@ function showPage(pageId) {
   document.getElementById(pageId).classList.add('active');
 
   if (pageId === 'flashcard-page') {
+    // Lade Karten neu bei jedem Seitenwechsel
+    const selectedCategory = document.getElementById('category').value;
+    const categoryCards = flashcards.filter(card => card.category === selectedCategory);
+    currentWeightedCards = createWeightedFlashcards(categoryCards);
+    currentIndex = 0;
     resetFlashcardDisplay();
-    filterFlashcards();
+    updateFlashcardDisplay(currentWeightedCards);
   } else if (pageId === 'statistics-page') {
     updateStatistics();
   }
