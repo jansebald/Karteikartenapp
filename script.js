@@ -36,7 +36,12 @@ const LEITNER_INTERVALS = {
 function initializeLeitnerData(card) {
   if (!card.level) card.level = 1;
   if (!card.lastReviewed) card.lastReviewed = null;
-  if (!card.nextReview) card.nextReview = new Date().toISOString();
+  // Setze nextReview auf gestern, damit die Karte sofort fällig ist
+  if (!card.nextReview) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    card.nextReview = yesterday.toISOString();
+  }
   return card;
 }
 
@@ -268,6 +273,9 @@ function importData(event) {
 
         alert('Daten erfolgreich importiert und ersetzt!');
       }
+
+      // Wichtig: Migriere importierte Karten zum Leitner-System
+      migrateLeitnerData();
 
       // Speichern und UI aktualisieren
       saveFlashcards();
