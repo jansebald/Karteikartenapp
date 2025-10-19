@@ -8,6 +8,7 @@ let showAnswer = false;
 let correctCount = 0;
 let incorrectCount = 0;
 let incorrectCards = [];
+let currentWeightedCards = []; // Gewichtete Liste der aktuellen Lern-Session
 
 // ========================================
 // STORAGE FUNKTIONEN
@@ -403,15 +404,34 @@ function loadFlashcards() {
 // ========================================
 // LERN-LOGIK
 // ========================================
+
+// Gewichtete Karten-Liste erstellen basierend auf Level
+function createWeightedFlashcards(cards) {
+  const weighted = [];
+  cards.forEach(card => {
+    // Gewichtung: Level 1 = 5x, Level 2 = 4x, ..., Level 5 = 1x
+    const weight = 6 - (card.level || 1);
+    for (let i = 0; i < weight; i++) {
+      weighted.push(card);
+    }
+  });
+  // Mische die gewichtete Liste
+  return weighted.sort(() => Math.random() - 0.5);
+}
+
 function filterFlashcards() {
   const selectedCategory = document.getElementById('category').value;
-  // Nur fällige Karten der ausgewählten Kategorie
-  const filteredFlashcards = flashcards.filter(card =>
-    card.category === selectedCategory && isCardDue(card)
+  // Zeige ALLE Karten der ausgewählten Kategorie, aber gewichtet
+  const categoryCards = flashcards.filter(card =>
+    card.category === selectedCategory
   );
+
+  // Erstelle gewichtete Liste und speichere sie global
+  currentWeightedCards = createWeightedFlashcards(categoryCards);
+
   currentIndex = 0;
   resetFlashcardDisplay();
-  updateFlashcardDisplay(filteredFlashcards);
+  updateFlashcardDisplay(currentWeightedCards);
 }
 
 function updateFlashcardDisplay(filteredFlashcards = flashcards) {
@@ -435,18 +455,13 @@ function updateFlashcardDisplay(filteredFlashcards = flashcards) {
 // EVENT LISTENER
 // ========================================
 document.getElementById('toggle-answer').addEventListener('click', () => {
-  if (flashcards.length > 0) {
+  if (flashcards.length > 0 && currentWeightedCards.length > 0) {
     showAnswer = !showAnswer;
     const flashcard = document.querySelector('.flashcard');
-    const selectedCategory = document.getElementById('category').value;
-    // Wichtig: Denselben Filter wie in filterFlashcards() verwenden
-    const filteredFlashcards = flashcards.filter(card =>
-      card.category === selectedCategory && isCardDue(card)
-    );
 
-    if (showAnswer && filteredFlashcards.length > 0) {
+    if (showAnswer) {
       // Flip zur Antwort
-      document.getElementById('answer').innerText = filteredFlashcards[currentIndex].answer;
+      document.getElementById('answer').innerText = currentWeightedCards[currentIndex].answer;
       flashcard.classList.add('flipped');
       document.getElementById('toggle-answer').innerText = 'Frage anzeigen';
       document.getElementById('correct-answer').style.display = 'inline-block';
@@ -463,14 +478,12 @@ document.getElementById('toggle-answer').addEventListener('click', () => {
 
 document.getElementById('correct-answer').addEventListener('click', () => {
   correctCount++;
-  const selectedCategory = document.getElementById('category').value;
-  const filteredFlashcards = flashcards.filter(card =>
-    card.category === selectedCategory && isCardDue(card)
-  );
 
   // Aktualisiere Leitner-Daten für richtige Antwort
-  const currentCard = filteredFlashcards[currentIndex];
-  const originalIndex = flashcards.findIndex(card => card === currentCard);
+  const currentCard = currentWeightedCards[currentIndex];
+  const originalIndex = flashcards.findIndex(card =>
+    card.question === currentCard.question && card.category === currentCard.category
+  );
   if (originalIndex !== -1) {
     flashcards[originalIndex] = handleCorrectAnswer(flashcards[originalIndex]);
     saveFlashcards();
@@ -485,16 +498,14 @@ document.getElementById('correct-answer').addEventListener('click', () => {
 
 document.getElementById('incorrect-answer').addEventListener('click', () => {
   incorrectCount++;
-  const selectedCategory = document.getElementById('category').value;
-  const filteredFlashcards = flashcards.filter(card =>
-    card.category === selectedCategory && isCardDue(card)
-  );
 
-  const currentCard = filteredFlashcards[currentIndex];
+  const currentCard = currentWeightedCards[currentIndex];
   incorrectCards.push(currentCard);
 
   // Aktualisiere Leitner-Daten für falsche Antwort
-  const originalIndex = flashcards.findIndex(card => card === currentCard);
+  const originalIndex = flashcards.findIndex(card =>
+    card.question === currentCard.question && card.category === currentCard.category
+  );
   if (originalIndex !== -1) {
     flashcards[originalIndex] = handleIncorrectAnswer(flashcards[originalIndex]);
     saveFlashcards();
@@ -508,17 +519,12 @@ document.getElementById('incorrect-answer').addEventListener('click', () => {
 });
 
 function nextCard() {
-  const selectedCategory = document.getElementById('category').value;
-  // Nur fällige Karten berücksichtigen
-  const filteredFlashcards = flashcards.filter(card =>
-    card.category === selectedCategory && isCardDue(card)
-  );
-  currentIndex = (currentIndex + 1) % filteredFlashcards.length;
+  currentIndex = (currentIndex + 1) % currentWeightedCards.length;
   if (currentIndex === 0) {
     showResult();
   } else {
     resetFlashcardDisplay();
-    updateFlashcardDisplay(filteredFlashcards);
+    updateFlashcardDisplay(currentWeightedCards);
   }
 }
 
