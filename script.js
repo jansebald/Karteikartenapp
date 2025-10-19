@@ -460,13 +460,21 @@ function updateFlashcardDisplay(filteredFlashcards = flashcards) {
 // EVENT LISTENER
 // ========================================
 document.getElementById('toggle-answer').addEventListener('click', () => {
+  console.log('Toggle clicked, flashcards:', flashcards.length, 'weighted:', currentWeightedCards.length);
+
   if (flashcards.length > 0 && currentWeightedCards.length > 0) {
     showAnswer = !showAnswer;
     const flashcard = document.querySelector('.flashcard');
+    const currentCard = currentWeightedCards[currentIndex];
 
-    if (showAnswer) {
+    console.log('Current card:', currentCard);
+    console.log('Answer:', currentCard ? currentCard.answer : 'NO CARD');
+
+    if (showAnswer && currentCard) {
       // Flip zur Antwort
-      document.getElementById('answer').innerText = currentWeightedCards[currentIndex].answer;
+      const answerText = currentCard.answer || 'Keine Antwort vorhanden';
+      console.log('Setting answer text to:', answerText);
+      document.getElementById('answer').innerText = answerText;
       flashcard.classList.add('flipped');
       document.getElementById('toggle-answer').innerText = 'Frage anzeigen';
       document.getElementById('correct-answer').style.display = 'inline-block';
@@ -478,6 +486,9 @@ document.getElementById('toggle-answer').addEventListener('click', () => {
       document.getElementById('correct-answer').style.display = 'none';
       document.getElementById('incorrect-answer').style.display = 'none';
     }
+  } else {
+    console.error('Keine Karten vorhanden!');
+    alert('Fehler: Keine Karteikarten geladen. Bitte kehren Sie zur Startseite zurück und versuchen Sie es erneut.');
   }
 });
 
