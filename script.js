@@ -37,6 +37,7 @@ const LEITNER_INTERVALS = {
 function initializeLeitnerData(card) {
   if (!card.level) card.level = 1;
   if (!card.lastReviewed) card.lastReviewed = null;
+  if (!card.topic) card.topic = ''; // Thema-Feld für alte Karten
   // Setze nextReview auf gestern, damit die Karte sofort fällig ist
   if (!card.nextReview) {
     const yesterday = new Date();
@@ -375,13 +376,15 @@ function addFlashcard() {
   const question = document.getElementById('new-question').value;
   const answer = document.getElementById('new-answer').value;
   const category = document.getElementById('new-category').value;
+  const topic = document.getElementById('new-topic').value || ''; // Optional
 
   if (question && answer && category) {
-    const newCard = initializeLeitnerData({ question, answer, category });
+    const newCard = initializeLeitnerData({ question, answer, category, topic });
     flashcards.push(newCard);
     saveFlashcards();
     document.getElementById('new-question').value = '';
     document.getElementById('new-answer').value = '';
+    document.getElementById('new-topic').value = '';
     loadFlashcards();
     showPage('settings-page');
   }
@@ -441,16 +444,31 @@ function filterFlashcards() {
 
 function updateFlashcardDisplay(filteredFlashcards = flashcards) {
   if (filteredFlashcards.length > 0) {
-    document.getElementById('question').innerText = filteredFlashcards[currentIndex].question;
-    document.getElementById('answer').innerText = ''; // Antwort zurücksetzen
-    document.getElementById('answer').style.display = 'none';
+    const currentCard = filteredFlashcards[currentIndex];
+
+    // Zeige Thema auf Vorder- und Rückseite (falls vorhanden)
+    const topicFront = document.getElementById('topic-front');
+    const topicBack = document.getElementById('topic-back');
+    if (currentCard.topic) {
+      topicFront.textContent = `Thema: ${currentCard.topic}`;
+      topicBack.textContent = `Thema: ${currentCard.topic}`;
+      topicFront.style.display = 'block';
+      topicBack.style.display = 'block';
+    } else {
+      topicFront.style.display = 'none';
+      topicBack.style.display = 'none';
+    }
+
+    document.getElementById('question').innerText = currentCard.question;
+    document.getElementById('answer').innerText = '';
     document.getElementById('toggle-answer').innerText = 'Antwort anzeigen';
     document.getElementById('correct-answer').style.display = 'none';
     document.getElementById('incorrect-answer').style.display = 'none';
   } else {
+    document.getElementById('topic-front').style.display = 'none';
+    document.getElementById('topic-back').style.display = 'none';
     document.getElementById('question').innerText = 'Keine Karteikarten vorhanden';
-    document.getElementById('answer').innerText = ''; // Antwort zurücksetzen
-    document.getElementById('answer').style.display = 'none';
+    document.getElementById('answer').innerText = '';
     document.getElementById('toggle-answer').innerText = 'Antwort anzeigen';
   }
 }
@@ -565,17 +583,35 @@ function loadFlashcardsForEdit() {
   flashcards.forEach((card, index) => {
     const option = document.createElement('option');
     option.value = index;
-    option.textContent = `${card.category}: ${card.question}`;
+    const displayTopic = card.topic ? `[${card.topic}] ` : '';
+    option.textContent = `${card.category}: ${displayTopic}${card.question.substring(0, 40)}...`;
     editFlashcardSelect.appendChild(option);
   });
+
+  // Lade die erste Karte beim Initialisieren
+  if (flashcards.length > 0) {
+    loadFlashcardForEdit();
+  }
+}
+
+function loadFlashcardForEdit() {
+  const selectedIndex = document.getElementById('edit-flashcard-select').value;
+  if (selectedIndex !== '' && flashcards[selectedIndex]) {
+    const card = flashcards[selectedIndex];
+    document.getElementById('edit-topic').value = card.topic || '';
+    document.getElementById('edit-question').value = card.question || '';
+    document.getElementById('edit-answer').value = card.answer || '';
+  }
 }
 
 function editFlashcard() {
   const selectedIndex = document.getElementById('edit-flashcard-select').value;
+  const newTopic = document.getElementById('edit-topic').value || '';
   const newQuestion = document.getElementById('edit-question').value;
   const newAnswer = document.getElementById('edit-answer').value;
 
   if (selectedIndex !== '' && newQuestion && newAnswer) {
+    flashcards[selectedIndex].topic = newTopic;
     flashcards[selectedIndex].question = newQuestion;
     flashcards[selectedIndex].answer = newAnswer;
     saveFlashcards();

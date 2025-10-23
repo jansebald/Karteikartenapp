@@ -35,10 +35,12 @@
         <div class="flashcard">
           <div class="flashcard-inner">
             <div class="flashcard-front">
+              <div id="topic-front" class="card-topic"></div>
               <div class="card-label">Frage</div>
               <div id="question"></div>
             </div>
             <div class="flashcard-back">
+              <div id="topic-back" class="card-topic"></div>
               <div class="card-label">Antwort</div>
               <div id="answer"></div>
             </div>
@@ -86,9 +88,13 @@
     <div id="settings-page" class="page">
       <div id="edit-flashcard-section">
         <h3>Karteikarte bearbeiten</h3>
-        <select id="edit-flashcard-select"></select>
-        <input type="text" id="edit-question" placeholder="Neue Frage">
-        <input type="text" id="edit-answer" placeholder="Neue Antwort">
+        <select id="edit-flashcard-select" onchange="loadFlashcardForEdit()"></select>
+        <label for="edit-topic"><i class="fas fa-tag"></i> Thema/Überschrift:</label>
+        <input type="text" id="edit-topic" placeholder="z.B. Satz des Pythagoras">
+        <label for="edit-question"><i class="fas fa-question-circle"></i> Frage:</label>
+        <textarea id="edit-question" rows="3" placeholder="Frage"></textarea>
+        <label for="edit-answer"><i class="fas fa-lightbulb"></i> Antwort:</label>
+        <textarea id="edit-answer" rows="4" placeholder="Antwort"></textarea>
         <button onclick="editFlashcard()">Speichern</button>
       </div>
       <h2>Einstellungen</h2>
@@ -120,11 +126,13 @@
     </div>
     <div id="add-flashcard-page" class="page">
       <h2>Karteikarte hinzufügen</h2>
-      <label for="new-question">Frage:</label>
-      <input type="text" id="new-question">
-      <label for="new-answer">Antwort:</label>
-      <input type="text" id="new-answer">
-      <label for="new-category">Kategorie:</label>
+      <label for="new-topic"><i class="fas fa-tag"></i> Thema/Überschrift (optional):</label>
+      <input type="text" id="new-topic" placeholder="z.B. Satz des Pythagoras">
+      <label for="new-question"><i class="fas fa-question-circle"></i> Frage:</label>
+      <textarea id="new-question" rows="3" placeholder="Deine Frage hier..."></textarea>
+      <label for="new-answer"><i class="fas fa-lightbulb"></i> Antwort:</label>
+      <textarea id="new-answer" rows="4" placeholder="Deine Antwort hier... (Stichpunkte möglich)"></textarea>
+      <label for="new-category"><i class="fas fa-folder"></i> Kategorie:</label>
       <select id="new-category">
         <!-- Kategorien werden hier dynamisch hinzugefügt -->
       </select>

@@ -133,9 +133,22 @@
     letter-spacing: 1px;
   }
 
+  .card-topic {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    text-align: center;
+  }
+
   #question,
   #answer {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 500;
     text-align: center;
     line-height: 1.5;
@@ -144,6 +157,32 @@
     word-wrap: break-word;
     max-width: 100%;
     display: block !important;
+    max-height: 140px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar Styling */
+  #question::-webkit-scrollbar,
+  #answer::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #question::-webkit-scrollbar-track,
+  #answer::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  #question::-webkit-scrollbar-thumb,
+  #answer::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+  }
+
+  #question::-webkit-scrollbar-thumb:hover,
+  #answer::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6);
   }
 
   #flashcard-container.correct .flashcard-front,
@@ -251,20 +290,27 @@
     color: #667eea;
   }
 
-  input[type="text"], select {
+  input[type="text"], select, textarea {
     width: 100%;
     padding: 12px 15px;
     margin-bottom: 10px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-size: 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     transition: all 0.3s ease;
+    resize: vertical;
   }
 
-  input[type="text"]:focus, select:focus {
+  input[type="text"]:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  textarea {
+    min-height: 80px;
+    line-height: 1.5;
   }
 
   select {
