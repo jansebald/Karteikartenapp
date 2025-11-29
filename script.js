@@ -9,6 +9,7 @@ let correctCount = 0;
 let incorrectCount = 0;
 let incorrectCards = [];
 let currentWeightedCards = []; // Gewichtete Liste der aktuellen Lern-Session
+let currentLearningLevel = null; // Welches Level wird gerade gelernt (für Stufen-basiertes Lernen)
 
 // ========================================
 // STORAGE FUNKTIONEN
@@ -307,15 +308,27 @@ function showPage(pageId) {
   document.getElementById(pageId).classList.add('active');
 
   if (pageId === 'flashcard-page') {
-    // Lade Karten neu bei jedem Seitenwechsel
-    const selectedCategory = document.getElementById('category').value;
-    const categoryCards = flashcards.filter(card => card.category === selectedCategory);
-    currentWeightedCards = createWeightedFlashcards(categoryCards);
-    currentIndex = 0;
-    resetFlashcardDisplay();
-    updateFlashcardDisplay(currentWeightedCards);
+    // WICHTIG: Nur Karten neu laden wenn wir NICHT gerade stufenbasiertes Lernen machen
+    // Wenn currentLearningLevel gesetzt ist, wurden die Karten bereits in startLevelLearning() geladen
+    if (currentLearningLevel === null) {
+      // Normales gewichtetes Lernen: Lade alle Karten der Kategorie
+      const selectedCategory = document.getElementById('category').value;
+      const categoryCards = flashcards.filter(card => card.category === selectedCategory);
+      currentWeightedCards = createWeightedFlashcards(categoryCards);
+      currentIndex = 0;
+      resetFlashcardDisplay();
+      updateFlashcardDisplay(currentWeightedCards);
+    }
+    // Bei stufenbasiertem Lernen: Karten wurden bereits in startLevelLearning() gesetzt, nichts tun
   } else if (pageId === 'statistics-page') {
     updateStatistics();
+  } else if (pageId === 'level-overview-page') {
+    // Lösche alte Session-Daten, um sicherzustellen dass keine stale data angezeigt wird
+    currentWeightedCards = [];
+    currentIndex = 0;
+    showLevelOverview();
+  } else if (pageId === 'remove-flashcard-page') {
+    loadFlashcardsForDelete();
   }
 }
 
@@ -399,14 +412,236 @@ function removeFlashcard() {
 }
 
 function loadFlashcards() {
-  const removeFlashcardSelect = document.getElementById('remove-flashcard');
-  removeFlashcardSelect.innerHTML = '';
-  flashcards.forEach(card => {
-    const option = document.createElement('option');
-    option.value = card.question;
-    option.textContent = `${card.category}: ${card.question}`;
-    removeFlashcardSelect.appendChild(option);
+  loadFlashcardsForDelete();
+}
+
+// Lädt Karteikarten in die neue Checkbox-Liste für Mehrfach-Löschung
+function loadFlashcardsForDelete() {
+  const deleteList = document.getElementById('flashcard-delete-list');
+  if (!deleteList) return;
+
+  deleteList.innerHTML = '';
+
+  if (flashcards.length === 0) {
+    deleteList.innerHTML = '<p class="no-cards-message">Keine Karteikarten vorhanden.</p>';
+    return;
+  }
+
+  flashcards.forEach((card, index) => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'delete-card-item';
+    cardDiv.innerHTML = `
+      <div class="delete-card-checkbox">
+        <input type="checkbox" id="card-${index}" value="${index}" onchange="updateSelectedCount()">
+      </div>
+      <label for="card-${index}" class="delete-card-content">
+        <div class="delete-card-header">
+          <span class="delete-card-category">${card.category}</span>
+          ${card.level ? `<span class="delete-card-level">Stufe ${card.level}</span>` : ''}
+        </div>
+        ${card.topic ? `<div class="delete-card-topic"><i class="fas fa-tag"></i> ${card.topic}</div>` : ''}
+        <div class="delete-card-question"><strong>Frage:</strong> ${card.question}</div>
+        <div class="delete-card-answer"><strong>Antwort:</strong> ${card.answer}</div>
+      </label>
+    `;
+    deleteList.appendChild(cardDiv);
   });
+
+  updateSelectedCount();
+}
+
+// Aktualisiert die Anzahl ausgewählter Karten
+function updateSelectedCount() {
+  const checkboxes = document.querySelectorAll('#flashcard-delete-list input[type="checkbox"]');
+  const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+  const countDisplay = document.getElementById('selected-count');
+  if (countDisplay) {
+    countDisplay.textContent = `${selectedCount} ausgewählt`;
+  }
+}
+
+// Wählt alle Karten aus
+function selectAllCards() {
+  const checkboxes = document.querySelectorAll('#flashcard-delete-list input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = true);
+  updateSelectedCount();
+}
+
+// Wählt alle Karten ab
+function deselectAllCards() {
+  const checkboxes = document.querySelectorAll('#flashcard-delete-list input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = false);
+  updateSelectedCount();
+}
+
+// Löscht mehrere ausgewählte Karteikarten
+function removeMultipleFlashcards() {
+  const checkboxes = document.querySelectorAll('#flashcard-delete-list input[type="checkbox"]:checked');
+  const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+  if (selectedIndices.length === 0) {
+    alert('Bitte wähle mindestens eine Karteikarte zum Löschen aus.');
+    return;
+  }
+
+  const confirmMessage = `Möchtest du wirklich ${selectedIndices.length} Karteikarte${selectedIndices.length !== 1 ? 'n' : ''} löschen?`;
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+
+  // Sortiere Indizes absteigend, um beim Löschen keine Indexverschiebung zu bekommen
+  selectedIndices.sort((a, b) => b - a);
+
+  // Lösche die Karten
+  selectedIndices.forEach(index => {
+    flashcards.splice(index, 1);
+  });
+
+  saveFlashcards();
+  loadFlashcards();
+  loadFlashcardsForEdit();
+
+  alert(`${selectedIndices.length} Karteikarte${selectedIndices.length !== 1 ? 'n' : ''} erfolgreich gelöscht!`);
+}
+
+// ========================================
+// STUFEN-ÜBERSICHT (LEVEL OVERVIEW)
+// ========================================
+function showLevelOverview() {
+  // Wichtig: Lade flashcards neu aus localStorage, um aktuelle Level-Änderungen zu sehen
+  flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+
+  const selectedCategory = document.getElementById('category').value;
+  document.getElementById('level-selected-category').textContent = selectedCategory;
+
+  // Hole alle Karten der ausgewählten Kategorie
+  const categoryCards = flashcards.filter(card => card.category === selectedCategory);
+
+  // Zähle Karten pro Level
+  const levelCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  categoryCards.forEach(card => {
+    const level = card.level || 1;
+    levelCounts[level]++;
+  });
+
+  // Erstelle HTML für Level-Übersicht
+  let html = '';
+
+  // Button für gemischtes Lernen (alle Stufen mit Gewichtung)
+  if (categoryCards.length > 0) {
+    html += `
+      <div class="mixed-learning-section">
+        <button onclick="startMixedLearning()" class="btn-mixed-learning">
+          <i class="fas fa-random"></i> Alle Stufen gemischt lernen
+        </button>
+        <p class="mixed-learning-info">Level 1 Karten erscheinen häufiger (Weighted System)</p>
+      </div>
+    `;
+  }
+
+  for (let level = 1; level <= 5; level++) {
+    const count = levelCounts[level];
+    const percentage = categoryCards.length > 0 ? (count / categoryCards.length) * 100 : 0;
+    const intervalText = level === 1 ? 'täglich' :
+                        level === 2 ? 'alle 3 Tage' :
+                        level === 3 ? 'wöchentlich' :
+                        level === 4 ? 'alle 2 Wochen' : 'monatlich';
+
+    html += `
+      <div class="level-item">
+        <div class="level-header">
+          <h3>Stufe ${level}</h3>
+          <span class="level-interval">${intervalText}</span>
+        </div>
+        <div class="level-bar-container">
+          <div class="level-bar-fill level-${level}" style="width: ${percentage}%">
+            ${percentage > 10 ? count : ''}
+          </div>
+        </div>
+        <div class="level-info">
+          <span class="level-count">${count} Karte${count !== 1 ? 'n' : ''}</span>
+          ${count > 0 ? `<button onclick="startLevelLearning(${level})" class="btn-level-start"><i class="fas fa-play"></i> Lernen</button>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  if (categoryCards.length === 0) {
+    html = '<p class="no-cards-message">Keine Karteikarten in dieser Kategorie vorhanden.</p>';
+  }
+
+  document.getElementById('level-overview-container').innerHTML = html;
+}
+
+// Startet das Lernen für eine bestimmte Stufe
+function startLevelLearning(level) {
+  const selectedCategory = document.getElementById('category').value;
+  const levelCards = filterByLevelAndCategory(selectedCategory, level);
+
+  if (levelCards.length === 0) {
+    alert('Keine Karten in dieser Stufe vorhanden!');
+    return;
+  }
+
+  // Setze die aktuellen Karten (OHNE Gewichtung, nur die gewählte Stufe)
+  currentWeightedCards = levelCards.sort(() => Math.random() - 0.5); // Nur mischen
+  currentIndex = 0;
+  correctCount = 0;
+  incorrectCount = 0;
+  incorrectCards = [];
+  currentLearningLevel = level; // Speichere welches Level gelernt wird
+
+  resetFlashcardDisplay();
+  updateFlashcardDisplay(currentWeightedCards);
+
+  // Stelle sicher, dass die Buttons beim Start aktiviert sind
+  setTimeout(() => {
+    const correctBtn = document.getElementById('correct-answer');
+    const incorrectBtn = document.getElementById('incorrect-answer');
+    if (correctBtn) correctBtn.disabled = false;
+    if (incorrectBtn) incorrectBtn.disabled = false;
+  }, 100);
+
+  showPage('flashcard-page');
+}
+
+// Filtert Karten nach Kategorie und Stufe
+function filterByLevelAndCategory(category, level) {
+  return flashcards.filter(card =>
+    card.category === category && (card.level || 1) === level
+  );
+}
+
+// Startet das gemischte Lernen (alle Stufen mit Gewichtung)
+function startMixedLearning() {
+  const selectedCategory = document.getElementById('category').value;
+  const categoryCards = flashcards.filter(card => card.category === selectedCategory);
+
+  if (categoryCards.length === 0) {
+    alert('Keine Karten in dieser Kategorie vorhanden!');
+    return;
+  }
+
+  // Erstelle gewichtete Liste (Level 1 = 5x, Level 2 = 4x, etc.)
+  currentWeightedCards = createWeightedFlashcards(categoryCards);
+  currentIndex = 0;
+  correctCount = 0;
+  incorrectCount = 0;
+  incorrectCards = [];
+  currentLearningLevel = null; // WICHTIG: null = gemischtes Lernen (nicht stufenbasiert)
+
+  resetFlashcardDisplay();
+  updateFlashcardDisplay(currentWeightedCards);
+
+  // Stelle sicher, dass die Buttons beim Start aktiviert sind
+  setTimeout(() => {
+    const correctBtn = document.getElementById('correct-answer');
+    const incorrectBtn = document.getElementById('incorrect-answer');
+    if (correctBtn) correctBtn.disabled = false;
+    if (incorrectBtn) incorrectBtn.disabled = false;
+  }, 100);
+
+  showPage('flashcard-page');
 }
 
 // ========================================
@@ -502,12 +737,22 @@ document.getElementById('toggle-answer').addEventListener('click', () => {
 });
 
 document.getElementById('correct-answer').addEventListener('click', () => {
+  // WICHTIG: Buttons sofort deaktivieren um Race Conditions zu vermeiden
+  const correctBtn = document.getElementById('correct-answer');
+  const incorrectBtn = document.getElementById('incorrect-answer');
+  correctBtn.disabled = true;
+  incorrectBtn.disabled = true;
+
   correctCount++;
 
-  // Aktualisiere Leitner-Daten für richtige Antwort
+  // Erfasse die Karte SOFORT, bevor irgendwas anderes passiert
   const currentCard = currentWeightedCards[currentIndex];
+
+  // Aktualisiere Leitner-Daten für richtige Antwort
   const originalIndex = flashcards.findIndex(card =>
-    card.question === currentCard.question && card.category === currentCard.category
+    card.question === currentCard.question &&
+    card.category === currentCard.category &&
+    card.answer === currentCard.answer // Verbesserte Matching-Genauigkeit
   );
   if (originalIndex !== -1) {
     flashcards[originalIndex] = handleCorrectAnswer(flashcards[originalIndex]);
@@ -522,14 +767,23 @@ document.getElementById('correct-answer').addEventListener('click', () => {
 });
 
 document.getElementById('incorrect-answer').addEventListener('click', () => {
+  // WICHTIG: Buttons sofort deaktivieren um Race Conditions zu vermeiden
+  const correctBtn = document.getElementById('correct-answer');
+  const incorrectBtn = document.getElementById('incorrect-answer');
+  correctBtn.disabled = true;
+  incorrectBtn.disabled = true;
+
   incorrectCount++;
 
+  // Erfasse die Karte SOFORT, bevor irgendwas anderes passiert
   const currentCard = currentWeightedCards[currentIndex];
   incorrectCards.push(currentCard);
 
   // Aktualisiere Leitner-Daten für falsche Antwort
   const originalIndex = flashcards.findIndex(card =>
-    card.question === currentCard.question && card.category === currentCard.category
+    card.question === currentCard.question &&
+    card.category === currentCard.category &&
+    card.answer === currentCard.answer // Verbesserte Matching-Genauigkeit
   );
   if (originalIndex !== -1) {
     flashcards[originalIndex] = handleIncorrectAnswer(flashcards[originalIndex]);
@@ -550,11 +804,40 @@ function nextCard() {
   } else {
     resetFlashcardDisplay();
     updateFlashcardDisplay(currentWeightedCards);
+
+    // Buttons wieder aktivieren für die nächste Karte (aber erst nach dem Flip)
+    // Die Buttons werden in resetFlashcardDisplay ausgeblendet, also warten wir kurz
+    setTimeout(() => {
+      const correctBtn = document.getElementById('correct-answer');
+      const incorrectBtn = document.getElementById('incorrect-answer');
+      if (correctBtn) correctBtn.disabled = false;
+      if (incorrectBtn) incorrectBtn.disabled = false;
+    }, 100);
   }
 }
 
 function showResult() {
-  const resultText = `Du hast ${correctCount} richtig und ${incorrectCount} falsch beantwortet.`;
+  let resultText = `Du hast ${correctCount} richtig und ${incorrectCount} falsch beantwortet.`;
+
+  // Wenn wir stufenbasiertes Lernen nutzen, prüfe ob die Stufe jetzt leer ist
+  if (currentLearningLevel !== null) {
+    const selectedCategory = document.getElementById('category').value;
+    const remainingCards = filterByLevelAndCategory(selectedCategory, currentLearningLevel);
+
+    if (remainingCards.length === 0) {
+      // Alle Karten haben die Stufe gewechselt!
+      if (correctCount > 0 && incorrectCount === 0) {
+        resultText += `\n\n🎉 Glückwunsch! Alle Karten sind in die nächste Stufe aufgestiegen!\nStufe ${currentLearningLevel} ist jetzt leer.`;
+      } else if (incorrectCount > 0 && correctCount === 0) {
+        resultText += `\n\n📚 Alle Karten sind zurück in Stufe 1.\nStufe ${currentLearningLevel} ist jetzt leer.`;
+      } else {
+        resultText += `\n\n✅ Alle Karten dieser Stufe wurden beantwortet!\nStufe ${currentLearningLevel} ist jetzt leer.`;
+      }
+    } else {
+      resultText += `\n\nNoch ${remainingCards.length} Karte${remainingCards.length !== 1 ? 'n' : ''} in Stufe ${currentLearningLevel}.`;
+    }
+  }
+
   document.getElementById('result').innerText = resultText;
 
   // Speichere Session
@@ -638,6 +921,7 @@ document.getElementById('result-page').addEventListener('click', () => {
   correctCount = 0;
   incorrectCount = 0;
   incorrectCards = [];
+  currentLearningLevel = null; // Reset level tracking
 });
 
 // Service Worker Registration für PWA

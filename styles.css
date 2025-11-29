@@ -37,6 +37,57 @@
     color: #555;
   }
 
+  /* Über die App Sektion */
+  .app-info {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+  }
+
+  .app-info h3 {
+    margin-top: 0;
+    color: #667eea;
+  }
+
+  .app-info-content {
+    margin-top: 15px;
+  }
+
+  .app-info-content p {
+    margin: 8px 0;
+    color: #555;
+  }
+
+  .version-number {
+    color: #667eea;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .app-description {
+    font-style: italic;
+    color: #777;
+    margin: 15px 0 !important;
+  }
+
+  .app-features {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .app-features p {
+    margin: 6px 0;
+    font-size: 14px;
+  }
+
+  .app-features i {
+    color: #28a745;
+    margin-right: 8px;
+  }
+
   /* Responsive Design */
   @media (max-width: 640px) {
     #app {
@@ -425,4 +476,321 @@
     font-weight: bold;
     color: #333;
   }
-  
+
+  /* Stufen-Übersicht Seite */
+  .level-category-info {
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .level-category-info h3 {
+    color: #667eea;
+    font-size: 24px;
+    margin: 10px 0;
+  }
+
+  #level-overview-container {
+    margin: 20px 0;
+  }
+
+  .level-item {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+  }
+
+  .level-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+  }
+
+  .level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .level-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+  }
+
+  .level-interval {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+  }
+
+  .level-bar-container {
+    height: 30px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+
+  .level-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    transition: width 0.3s ease;
+  }
+
+  .level-bar-fill.level-1 {
+    background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+  }
+
+  .level-bar-fill.level-2 {
+    background: linear-gradient(90deg, #fd7e14 0%, #e8590c 100%);
+  }
+
+  .level-bar-fill.level-3 {
+    background: linear-gradient(90deg, #ffc107 0%, #e0a800 100%);
+  }
+
+  .level-bar-fill.level-4 {
+    background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+  }
+
+  .level-bar-fill.level-5 {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  }
+
+  .level-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .level-count {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .btn-level-start {
+    width: auto;
+    padding: 8px 16px;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .no-cards-message {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px;
+  }
+
+  /* Gemischtes Lernen Button */
+  .mixed-learning-section {
+    margin: 20px 0 30px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .btn-mixed-learning {
+    width: 100%;
+    padding: 16px 20px;
+    margin: 0 0 10px 0;
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-mixed-learning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    background: #f8f9fa;
+  }
+
+  .btn-mixed-learning i {
+    margin-right: 10px;
+  }
+
+  .mixed-learning-info {
+    color: white;
+    font-size: 14px;
+    margin: 0;
+    opacity: 0.9;
+  }
+
+  /* Lösch-Seite mit Checkboxen */
+  .delete-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .delete-controls button {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .selected-count {
+    background-color: #667eea;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .flashcard-delete-list {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px 0;
+    background-color: #f9f9f9;
+  }
+
+  .flashcard-delete-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .flashcard-delete-list::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 4px;
+  }
+
+  .flashcard-delete-list::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+  }
+
+  .flashcard-delete-list::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+  }
+
+  .delete-card-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .delete-card-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  }
+
+  .delete-card-checkbox {
+    flex-shrink: 0;
+    margin-right: 15px;
+  }
+
+  .delete-card-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #667eea;
+  }
+
+  .delete-card-content {
+    flex: 1;
+    cursor: pointer;
+  }
+
+  .delete-card-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .delete-card-category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .delete-card-level {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .delete-card-topic {
+    color: #667eea;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .delete-card-topic i {
+    margin-right: 5px;
+  }
+
+  .delete-card-question,
+  .delete-card-answer {
+    margin: 6px 0;
+    line-height: 1.5;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .delete-card-question strong,
+  .delete-card-answer strong {
+    color: #667eea;
+    margin-right: 5px;
+  }
+
+  @media (max-width: 640px) {
+    .delete-controls {
+      flex-direction: column;
+    }
+
+    .delete-controls button {
+      width: 100%;
+    }
+
+    .selected-count {
+      width: 100%;
+      text-align: center;
+    }
+
+    .flashcard-delete-list {
+      max-height: 400px;
+    }
+
+    .delete-card-item {
+      flex-direction: column;
+    }
+
+    .delete-card-checkbox {
+      margin-bottom: 10px;
+    }
+  }

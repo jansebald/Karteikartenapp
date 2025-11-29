@@ -25,10 +25,21 @@
         <option value="Deutsch">Deutsch</option>
         <option value="Englisch">Englisch</option>
       </select>
-      <button onclick="showPage('flashcard-page')" class="btn-primary"><i class="fas fa-play"></i> Lernen starten</button>
+      <button onclick="showPage('level-overview-page')" class="btn-primary"><i class="fas fa-play"></i> Lernen starten</button>
       <button onclick="showPage('statistics-page')" class="btn-info"><i class="fas fa-chart-bar"></i> Statistiken</button>
       <button onclick="showPage('settings-page')" class="btn-secondary"><i class="fas fa-cog"></i> Einstellungen</button>
-    </div>    
+    </div>
+
+    <!-- Stufen-Übersicht Seite -->
+    <div id="level-overview-page" class="page">
+      <h2>Stufen-Übersicht</h2>
+      <div class="level-category-info">
+        <h3 id="level-selected-category"></h3>
+      </div>
+      <div id="level-overview-container"></div>
+      <button onclick="showPage('start-page')" class="btn-secondary"><i class="fas fa-arrow-left"></i> Zurück</button>
+    </div>
+
     <div id="flashcard-page" class="page">
       <h2>Karteikarten</h2>
       <div id="flashcard-container">
@@ -107,6 +118,21 @@
       <button onclick="exportData()" class="btn-info"><i class="fas fa-download"></i> Daten exportieren (JSON)</button>
       <button onclick="document.getElementById('import-file').click()" class="btn-info"><i class="fas fa-upload"></i> Daten importieren</button>
       <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+
+      <div class="app-info">
+        <h3><i class="fas fa-info-circle"></i> Über die App</h3>
+        <div class="app-info-content">
+          <p><strong>Karteikarten App</strong></p>
+          <p>Version: <span class="version-number">v1.0.0</span></p>
+          <p class="app-description">Intelligente Lern-App mit Leitner Spaced Repetition System</p>
+          <div class="app-features">
+            <p><i class="fas fa-check"></i> Stufenweises Lernen (5 Leitner-Stufen)</p>
+            <p><i class="fas fa-check"></i> Gemischtes Lernen mit Gewichtung</p>
+            <p><i class="fas fa-check"></i> Statistiken & Lernverlauf</p>
+            <p><i class="fas fa-check"></i> Daten Export & Import</p>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="add-category-page" class="page">
       <h2>Kategorie hinzufügen</h2>
@@ -140,13 +166,17 @@
       <button onclick="showPage('settings-page')">Zurück</button>
     </div>
     <div id="remove-flashcard-page" class="page">
-      <h2>Karteikarte löschen</h2>
-      <label for="remove-flashcard">Karteikarte auswählen:</label>
-      <select id="remove-flashcard">
+      <h2>Karteikarten löschen</h2>
+      <div class="delete-controls">
+        <button onclick="selectAllCards()" class="btn-info"><i class="fas fa-check-double"></i> Alle auswählen</button>
+        <button onclick="deselectAllCards()" class="btn-secondary"><i class="fas fa-times"></i> Alle abwählen</button>
+        <span id="selected-count" class="selected-count">0 ausgewählt</span>
+      </div>
+      <div id="flashcard-delete-list" class="flashcard-delete-list">
         <!-- Karteikarten werden hier dynamisch hinzugefügt -->
-      </select>
-      <button onclick="removeFlashcard()">Löschen</button>
-      <button onclick="showPage('settings-page')">Zurück</button>
+      </div>
+      <button onclick="removeMultipleFlashcards()" class="btn-danger"><i class="fas fa-trash"></i> Ausgewählte löschen</button>
+      <button onclick="showPage('settings-page')" class="btn-secondary"><i class="fas fa-arrow-left"></i> Zurück</button>
     </div>
   </div>
   <script src="script.js"></script>
