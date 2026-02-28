@@ -167,6 +167,7 @@
   .flashcard-front {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    touch-action: pan-y;
   }
 
   .flashcard-back {
@@ -211,6 +212,8 @@
     max-height: 140px;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   /* Scrollbar Styling */

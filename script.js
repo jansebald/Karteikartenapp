@@ -925,6 +925,16 @@ document.getElementById('result-page').addEventListener('click', () => {
 });
 
 // Service Worker Registration für PWA
+// Touchpad-/Mausrad-Scrolling für Frage auf Desktop sicherstellen
+document.getElementById('question').addEventListener('wheel', function(e) {
+  const el = this;
+  const atTop = el.scrollTop === 0;
+  const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+  if (!(atTop && e.deltaY < 0) && !(atBottom && e.deltaY > 0)) {
+    e.stopPropagation();
+  }
+}, { passive: true });
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js').then(registration => {
