@@ -168,6 +168,7 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     touch-action: pan-y;
+    -webkit-transform: translateZ(0);
   }
 
   .flashcard-back {
@@ -214,6 +215,8 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   /* Scrollbar Styling */

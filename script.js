@@ -935,6 +935,25 @@ document.getElementById('question').addEventListener('wheel', function(e) {
   }
 }, { passive: true });
 
+// Touch-Scrolling für Frage auf iOS sicherstellen
+(function() {
+  const questionEl = document.getElementById('question');
+  let startY = 0;
+  let startScrollTop = 0;
+
+  questionEl.addEventListener('touchstart', function(e) {
+    startY = e.touches[0].clientY;
+    startScrollTop = this.scrollTop;
+  }, { passive: true });
+
+  questionEl.addEventListener('touchmove', function(e) {
+    if (this.scrollHeight <= this.clientHeight) return;
+    const deltaY = startY - e.touches[0].clientY;
+    this.scrollTop = startScrollTop + deltaY;
+    e.stopPropagation();
+  }, { passive: true });
+})();
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js').then(registration => {
