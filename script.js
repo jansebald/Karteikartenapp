@@ -938,20 +938,46 @@ document.getElementById('question').addEventListener('wheel', function(e) {
 // Touch-Scrolling für Frage auf iOS sicherstellen
 (function() {
   const questionEl = document.getElementById('question');
+  const scrollTrack = document.getElementById('question-scrollbar-track');
+  const scrollThumb = document.getElementById('question-scrollbar-thumb');
   let startY = 0;
   let startScrollTop = 0;
+  let hideScrollbarTimer = null;
+
+  function updateScrollbar() {
+    if (!questionEl || !scrollTrack || !scrollThumb) return;
+    const scrollable = questionEl.scrollHeight > questionEl.clientHeight;
+    if (!scrollable) {
+      scrollTrack.classList.remove('visible');
+      return;
+    }
+    const trackHeight = questionEl.clientHeight;
+    const thumbHeight = Math.max(20, (questionEl.clientHeight / questionEl.scrollHeight) * trackHeight);
+    const scrollRatio = questionEl.scrollTop / (questionEl.scrollHeight - questionEl.clientHeight);
+    const thumbTop = scrollRatio * (trackHeight - thumbHeight);
+    scrollThumb.style.height = thumbHeight + 'px';
+    scrollThumb.style.top = thumbTop + 'px';
+    scrollTrack.classList.add('visible');
+    clearTimeout(hideScrollbarTimer);
+    hideScrollbarTimer = setTimeout(() => scrollTrack.classList.remove('visible'), 1000);
+  }
 
   questionEl.addEventListener('touchstart', function(e) {
     startY = e.touches[0].clientY;
     startScrollTop = this.scrollTop;
+    updateScrollbar();
   }, { passive: true });
 
   questionEl.addEventListener('touchmove', function(e) {
     if (this.scrollHeight <= this.clientHeight) return;
     const deltaY = startY - e.touches[0].clientY;
     this.scrollTop = startScrollTop + deltaY;
+    updateScrollbar();
+    e.preventDefault();
     e.stopPropagation();
-  }, { passive: true });
+  }, { passive: false });
+
+  questionEl.addEventListener('scroll', updateScrollbar, { passive: true });
 })();
 
 if ('serviceWorker' in navigator) {

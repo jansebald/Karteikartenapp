@@ -199,6 +199,14 @@
     text-align: center;
   }
 
+  .question-scroll-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: stretch;
+  }
+
   #question,
   #answer {
     font-size: 18px;
@@ -217,6 +225,35 @@
     touch-action: pan-y;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    flex: 1;
+  }
+
+  #question-scrollbar-track {
+    width: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    position: relative;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  #question-scrollbar-track.visible {
+    opacity: 1;
+  }
+
+  #question-scrollbar-thumb {
+    width: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: background 0.2s;
+  }
+
+  #question-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.7);
   }
 
   /* Scrollbar Styling */
